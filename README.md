@@ -7,7 +7,7 @@ You can upload this in your webserver and let it run
 ```
 pip install requirements.txt
 ```
-* Open `config.json`, paster your MongoDB Host, Database Name and the stand by time in the three fields.
+* Open `config.json`, paster your MongoDB Host, Database Name and the stand by time (seconds) in the three fields.
 Example:
 ```
 {
