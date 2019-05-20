@@ -1,5 +1,5 @@
 {
     "host" : "",
-    "database" : "",
+    "database" : "fairytail",
     "sleep" : 3600
 }
