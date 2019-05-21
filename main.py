@@ -1,5 +1,7 @@
 from pymongo import MongoClient
 from bson.json_util import dumps
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
 import os, json, time
 import datetime as dt
 
@@ -12,6 +14,16 @@ os.chdir(dname)
 
 with open('config.json', 'r') as f:
         data = json.load(f)
+
+
+if data['GDrive']:
+        gauth = GoogleAuth()
+        drive = GoogleDrive(gauth)
+
+        folder_metadata = {'title' : 'backups', 'mimeType' : 'application/vnd.google-apps.folder'}
+        folder = drive.CreateFile(folder_metadata)
+        folder.Upload()
+        folderid = folder['id']
 
 
 # if backups dir does not exist, create one
@@ -28,25 +40,27 @@ def main():
     collections = db.collection_names(include_system_collections=False) # get all the collections in the database
     time_stamp = dt.datetime.now().strftime("[%a, %d-%m-%Y %H.%M]") # Create a time stamp
 
-    try:
-        for collection in collections:
-            filename = f"{collection}-{time_stamp}.json"
 
-            counter = 0
-            for document in db[collection].find():
-                with open(f'backups/{filename}', 'a') as f:
-                        f.write(dumps(document) + "\n")
-                counter += 1
+    for collection in collections:
+        filename = f"{collection}-{time_stamp}.json"
 
-            print(f'''
+        counter = 0
+        for document in db[collection].find():
+            with open(f'backups/{filename}', 'a') as f:
+                    f.write(dumps(document) + "\n")
+            counter += 1
+
+        if data['GDrive']:
+
+            file = drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": folderid}], "title" : f"{filename}"})
+            file.SetContentFile(f'backups/{filename}')
+            file.Upload()
+
+        
+        print(f'''
 {time_stamp}
 Backed up {counter} Documents from {collection} in backups/{filename}
 ''')
-
-
-    except Exception as e:
-        print("Something went wrong")
-        raise e
 
 
 while True:
