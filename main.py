@@ -20,10 +20,19 @@ if data['GDrive']:
         gauth = GoogleAuth()
         drive = GoogleDrive(gauth)
 
-        folder_metadata = {'title' : 'backups', 'mimeType' : 'application/vnd.google-apps.folder'}
-        folder = drive.CreateFile(folder_metadata)
-        folder.Upload()
-        folderid = folder['id']
+        file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+
+        folderid = None
+        for folder in file_list:
+                if folder['title'] == 'backups':
+                        folderid = folder['id']
+
+        if folderid is None:
+
+                folder_metadata = {'title' : 'backups', 'mimeType' : 'application/vnd.google-apps.folder'}
+                folder = drive.CreateFile(folder_metadata)
+                folder.Upload()
+                folderid = folder['id']
 
 
 # if backups dir does not exist, create one
