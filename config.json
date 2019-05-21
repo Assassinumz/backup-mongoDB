@@ -1,5 +1,6 @@
 {
     "host" : "",
     "database" : "fairytail",
-    "sleep" : 3600
+    "sleep" : 3600,
+    "GDrive" : false
 }
